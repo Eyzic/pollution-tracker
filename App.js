@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
 import * as ApiCaller from './ApiCaller';
+import { PollutionHistory } from './PollutionHistory';
 
 export default function App() {
   const [temp, setTemp] = useState(0);
@@ -13,6 +14,10 @@ export default function App() {
   const [wind, setWind] = useState(0);
   const [humidity, setHumidity] = useState(0);
   const [pollution, setPollution] = useState(0);
+  const [date, setDate] = useState(getFormattedDate(new Date));
+
+
+  const database = new PollutionHistory([]);
 
   useEffect(() => {
     //Get coordinates and call Weather API on successfully getting coordinates.
@@ -20,8 +25,10 @@ export default function App() {
       let currentWeatherData = await ApiCaller.getCurrentWeather(position.coords.latitude, position.coords.longitude);
       let pollutionData = await ApiCaller.getAirPollution(position.coords.latitude, position.coords.longitude);
 
-      if (pollutionData !== undefined)
+      if (pollutionData !== undefined) {
         setPollution(pollutionData.list[0].main.aqi)
+        savePollutionData(pollutionData.list[0].dt, pollutionData.list[0].main.aqi);
+      }
 
       if (currentWeatherData !== undefined) {
         let iconId = currentWeatherData.weather[0].icon;
@@ -51,10 +58,29 @@ export default function App() {
     return timeInDateFormat;
   }
 
+  function getFormattedDate(date) {
+    let month = date.toLocaleString('default', { month: 'long' });
+    let formattedDate = `${date.getUTCDate()} ${month} - ${date.getFullYear()}`;
+    return formattedDate;
+  }
 
+  function savePollutionData(unixtime, aqi) {
+    let latestPollution = database.getLatestPollution();
+    if (latestPollution != undefined) {
+      console.log(`POLLUTION : ${latestPollution}`);
+      console.log(database);
+      if (latestPollution == []) { pollution.add(unixtime, aqi); }
+      const DAY_HAS_PASSED = (unixtime, latestPollution) => { unixtime - latestPollution.time > (60 * 60 * 24) } //Use UNIX CONSTANT later
+
+      if (aqi !== latestPollution.aqi || DAY_HAS_PASSED) {
+        pollution.add(unixtime, aqi);
+      }
+    } else { console.error("Could not find latest pollution data.") }
+  }
 
   return (
     <View style={styles.container}>
+      <Text style={styles.h1}>{date}</Text>
       <Text style={styles.h3}>{city}</Text>
       <Image source={{ uri: icon }} style={{ width: 100, height: 100 }} />
       <Text style={styles.h1}>{temp} ° C</Text>
@@ -69,12 +95,12 @@ export default function App() {
         <View style={{ alignItems: 'center' }}>
           <Image source={require("./assets/sunrise.png")} style={{ width: 84, height: 36 }} />
           <Text style={styles.h2}>Sunrise</Text>
-          <Text>{sunrise}</Text>
+          <Text style={styles.h1}>{sunrise}</Text>
         </View>
         <View style={{ alignItems: 'center' }}>
           <Image source={require("./assets/sunset.png")} style={{ width: 84, height: 36 }} />
           <Text style={styles.h2}>Sunset</Text>
-          <Text>{sunset}</Text>
+          <Text style={styles.h1}>{sunset}</Text>
         </View>
       </View>
       <Text style={styles.h2}>Current pollution level:</Text>
