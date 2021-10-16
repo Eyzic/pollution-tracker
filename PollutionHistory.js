@@ -1,6 +1,6 @@
 export class PollutionHistory {
-    constructor(array) {
-        this.pollutionList = array;
+    constructor() {
+        this.pollutionList = this.loadDataFromStorage("pollutionData");
         this.getLatestPollution = this.getLatestPollution;
     }
     pollutionList = []
@@ -10,8 +10,24 @@ export class PollutionHistory {
         this.pollutionList == [] ? [] : this.pollutionList[this.pollutionList.length - 1];
     }
 
+    async loadDataFromStorage(key) {
+        try {
+            let data = await FileSystem.readAsStringAsync(FileSystem.documentDirectory + key); //Possibly return written
+            console.log(data);
+            return JSON.parse(data);
+        } catch (error) {
+            return [];
+        }
+    }
+
+    async writeDataToStorage(key, value) {
+        let written = await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + key, JSON.stringify(value)); //Possibly return written
+        console.log(written);
+    }
+
     add(unixtime, aqi) {
         this.pollutionList.push({ time: unixtime, aqi: aqi })
+        this.writeDataToStorage("pollutionData", this.pollutionList);
     }
 
     getAveragePollution(unixtime, array) {
