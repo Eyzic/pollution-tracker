@@ -17,26 +17,39 @@ export default function App() {
   useEffect(() => {
     //Get coordinates and call Weather API on successfully getting coordinates.
     ApiCaller.getPosition(async (position) => {
-      let currentWeather = await ApiCaller.getCurrentWeather(position.coords.latitude, position.coords.longitude);
-      let pollutionObject = await ApiCaller.getAirPollution(position.coords.latitude, position.coords.longitude, Date.now());
+      let currentWeatherData = await ApiCaller.getCurrentWeather(position.coords.latitude, position.coords.longitude);
+      let pollutionData = await ApiCaller.getAirPollution(position.coords.latitude, position.coords.longitude);
 
-      setPollution(pollutionObject.list[0].main.aqi)
-      let iconId = currentWeather.weather[0].icon;
+      if (pollutionData !== undefined)
+        setPollution(pollutionData.list[0].main.aqi)
 
-      // Set all api-related data.
-      setTemp(currentWeather.main.temp);
-      setIcon(`https://openweathermap.org/img/wn/${iconId}@2x.png`);
-      setDescription(currentWeather.weather[0].description);
-      setCity(currentWeather.name);
+      if (currentWeatherData !== undefined) {
+        let iconId = currentWeatherData.weather[0].icon;
 
-      setSunrise(currentWeather.sys.sunrise);   //Omvandla från UNIX time till xx:xx
-      setSunset(currentWeather.sys.sunset);     //Omvandla från UNIX time till xx:xx
-
-      setWind(currentWeather.wind.speed);
-      setHumidity(currentWeather.main.humidity);
+        setTemp(currentWeatherData.main.temp.toPrecision(2));
+        setIcon(`https://openweathermap.org/img/wn/${iconId}@2x.png`);
+        setDescription(currentWeatherData.weather[0].description);
+        setCity(currentWeatherData.name);
+        setSunrise(convertUnixTimeToDate(currentWeatherData.sys.sunrise));
+        setSunset(convertUnixTimeToDate(currentWeatherData.sys.sunset));
+        setWind(currentWeatherData.wind.speed);
+        setHumidity(currentWeatherData.main.humidity);
+      }
     });
 
   }, [icon])
+
+  const leftPad = (value, length) => value.toString().length < length ? leftPad("0" + value, length) : value;
+
+  function convertUnixTimeToDate(unixtime) {
+    let date = new Date(unixtime * 1000)
+    let hours = leftPad(date.getUTCHours(), 2);
+    let minutes = leftPad(date.getUTCMinutes(), 2);
+
+    let timeInDateFormat = `${hours}:${minutes}`
+
+    return timeInDateFormat;
+  }
 
 
 
