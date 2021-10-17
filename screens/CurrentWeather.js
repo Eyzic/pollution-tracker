@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, Image } from 'react-native';
 import * as ApiCaller from '../backend/ApiCaller';
 import { PollutionHistory } from '../backend/PollutionHistory';
 import DatabaseContext from '../DatabaseContext';
+import * as Location from 'expo-location';
 
 export default function App() {
   const [temp, setTemp] = useState(0);
@@ -26,30 +27,63 @@ export default function App() {
 
   useEffect(() => {
     //Get coordinates and call Weather API on successfully getting coordinates.
-    ApiCaller.getPosition(async (position) => {
-      let currentWeatherData = await ApiCaller.getCurrentWeather(position.coords.latitude, position.coords.longitude);
-      let pollutionData = await ApiCaller.getAirPollution(position.coords.latitude, position.coords.longitude);
 
-      if (pollutionData !== undefined) {
-        setPollution(pollutionData.list[0].main.aqi)
-        savePollutionData(pollutionData.list[0].dt, pollutionData.list[0].main.aqi);
+    //let position = await refreshLocation();
+    refreshLocation().then(async (position) => {
+      if (position == undefined) {
+        console.error("Could not get position!");
+        return;
       }
 
-      if (currentWeatherData !== undefined) {
-        let iconId = currentWeatherData.weather[0].icon;
+      ApiCaller.getCurrentWeather(position.coords.latitude, position.coords.longitude)
+        .then((currentWeatherData) => {
+          if (currentWeatherData == undefined) {
+            console.error("Could not get weather data!");
+            return;
+          }
 
-        setTemp(currentWeatherData.main.temp.toPrecision(2));
-        setIcon(`https://openweathermap.org/img/wn/${iconId}@2x.png`);
-        setDescription(currentWeatherData.weather[0].description);
-        setCity(currentWeatherData.name);
-        setSunrise(convertUnixTimeToDate(currentWeatherData.sys.sunrise));
-        setSunset(convertUnixTimeToDate(currentWeatherData.sys.sunset));
-        setWind(currentWeatherData.wind.speed);
-        setHumidity(currentWeatherData.main.humidity);
-      }
-    });
+          let iconId = currentWeatherData.weather[0].icon;
+
+          setTemp(currentWeatherData.main.temp.toPrecision(2));
+          setIcon(`https://openweathermap.org/img/wn/${iconId}@2x.png`);
+          setDescription(currentWeatherData.weather[0].description);
+          setCity(currentWeatherData.name);
+          setSunrise(convertUnixTimeToDate(currentWeatherData.sys.sunrise));
+          setSunset(convertUnixTimeToDate(currentWeatherData.sys.sunset));
+          setWind(currentWeatherData.wind.speed);
+          setHumidity(currentWeatherData.main.humidity);
+
+        });
+      ApiCaller.getAirPollution(position.coords.latitude, position.coords.longitude)
+        .then((pollutionData) => {
+          if (pollutionData !== undefined) {
+            setPollution(pollutionData.list[0].main.aqi)
+            savePollutionData(pollutionData.list[0].dt, pollutionData.list[0].main.aqi);
+          }
+        });
+    })
+
 
   }, [icon])
+
+  async function refreshLocation() {
+    if (checkLocationPermissions()) {
+      let location = await Location.getCurrentPositionAsync({});
+      return location;
+    }
+    console.error("Permissions for location denied!");
+  }
+
+  async function checkLocationPermissions() {
+    let { permission } = Location.getBackgroundPermissionsAsync();
+    if (!permission) {
+      let { request } = Location.requestBackgroundPermissionsAsync();
+      if (request !== 'granted') { return false; }
+    }
+    return true;
+
+    //Location.getForegroundPermissionsAsync();
+  }
 
   const leftPad = (value, length) => value.toString().length < length ? leftPad("0" + value, length) : value;
 
@@ -64,8 +98,8 @@ export default function App() {
   }
 
   function getFormattedDate(date) {
-    let month = date.toLocaleString('default', { month: 'long' });
-    let formattedDate = `${date.getUTCDate()} ${month} - ${date.getFullYear()}`;
+    let monthName = ["January", "Februrary", "March", "April", "June", "July", "August", "September", "October", "November", "December"]
+    let formattedDate = `${date.getUTCDate()} ${monthName[date.getMonth() - 1]} - ${date.getFullYear()}`;
     return formattedDate;
   }
 
