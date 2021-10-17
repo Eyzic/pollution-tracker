@@ -1,10 +1,16 @@
+import * as FileSystem from 'expo-file-system'
+
 export class PollutionHistory {
     constructor() {
-        this.pollutionList = this.loadDataFromStorage("pollutionData");
-        this.getLatestPollution = this.getLatestPollution;
+        this.pollutionList = [];
     }
-    pollutionList = []
     A_DAY_IN_UNIX_TIME = 24 * 60 * 60;
+
+    async init() {  //Maybe add path to directory where saved here? Default same as earlier.
+        //Maybe add a timer which timeouts after 5-10 sec returning false.
+        this.pollutionList = await this.loadDataFromStorage("pollutionData");
+        return true;
+    }
 
     getLatestPollution() {
         this.pollutionList == [] ? [] : this.pollutionList[this.pollutionList.length - 1];
@@ -16,6 +22,7 @@ export class PollutionHistory {
             console.log(data);
             return JSON.parse(data);
         } catch (error) {
+            console.error(error);
             return [];
         }
     }

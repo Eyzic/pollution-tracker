@@ -1,9 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
-import * as ApiCaller from './ApiCaller';
-import { PollutionHistory } from './PollutionHistory';
-import { Storage } from 'expo-storage';
+import * as ApiCaller from '../backend/ApiCaller';
+import { PollutionHistory } from '../backend/PollutionHistory';
+import DatabaseContext from '../DatabaseContext';
 
 export default function App() {
   const [temp, setTemp] = useState(0);
@@ -17,13 +17,11 @@ export default function App() {
   const [pollution, setPollution] = useState(0);
   const [date, setDate] = useState(getFormattedDate(new Date));
 
-  const [database, setDatabase] = useState(0);
-
-
+  const database = useContext(DatabaseContext);
 
   useEffect(() => {
-    const database = new PollutionHistory();
-    setDatabase(database);
+    console.log("Loading Context");
+    console.log(database);
   }, [])
 
   useEffect(() => {
@@ -100,12 +98,12 @@ export default function App() {
 
       <View style={[styles.row, { backgroundColor: 'hsla(360,23%,9%,0.27)' }]}>
         <View style={{ alignItems: 'center' }}>
-          <Image source={require("./assets/sunrise.png")} style={{ width: 84, height: 36 }} />
+          <Image source={require("../assets/sunrise.png")} style={{ width: 84, height: 36 }} />
           <Text style={styles.h2}>Sunrise</Text>
           <Text style={styles.h1}>{sunrise}</Text>
         </View>
         <View style={{ alignItems: 'center' }}>
-          <Image source={require("./assets/sunset.png")} style={{ width: 84, height: 36 }} />
+          <Image source={require("../assets/sunset.png")} style={{ width: 84, height: 36 }} />
           <Text style={styles.h2}>Sunset</Text>
           <Text style={styles.h1}>{sunset}</Text>
         </View>

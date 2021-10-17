@@ -1,4 +1,5 @@
 import { OPENWEATHERMAP_API_KEY } from './Local_Key.js'
+import * as Location from 'expo-location';
 
 export function getCurrentWeather(latitude, longitude) {
     return fetchJson(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHERMAP_API_KEY}&units=metric`)
@@ -22,7 +23,16 @@ function checkForErrors(response) {
     return response;
 }
 
-export function getPosition(success) {
+export async function getPosition(success) {
     navigator.geolocation.getCurrentPosition(success, () => { console.error(`ERROR: ${err.message}`); });
+    /* let { status } = await Location.requestForegroundPermissionsAsync();
+     console.log("STATUS: ");
+     console.log(status);
+     if (status !== "granted") { return }
+ 
+     let location = await Location.getCurrentPositionAsync();
+     console.log("LCATION: ");
+     console.log(location);
+     return location;*/
 }
 
