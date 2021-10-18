@@ -16,9 +16,10 @@ The app uses https://openweathermap.org/api as its data source. To access the AP
 
 This will ensure that the app finds your private key.
 
-To start the application open up a terminal where you can access expo and navigate to the project folder. Once in the folder, simply write `expo start`. A local server will then start and you have two options: Scan the QR code with your mobile with the app Expo Go or navigate to the local server in your browser. The url will be above the QR code (normally it is `http://localhost:19002`). From here you can choose in the sidebar whether you want to run it as a android emulator, iOS simulator or in the web browser. If you do not know how to connect an emulator I suggest running it in the browser. Using web developer tools in your browser you should be able to view it like a mobile application. (`CTRL + SHIFT + M` in firefox)
-
 ## Running the application
+
+
+To start the application open up a terminal where you can access expo and navigate to the project folder. Once in the folder, simply write `expo start`. A local server will then start and you have two options: Scan the QR code with your mobile with the app Expo Go or navigate to the local server in your browser. The url will be above the QR code (normally it is `http://localhost:19002`). From here you can choose in the sidebar whether you want to run it as a android emulator, iOS simulator or in the web browser. If you do not know how to connect an emulator I suggest running it in the browser. Using web developer tools in your browser you should be able to view it like a mobile application. (`CTRL + SHIFT + M` in firefox)
 
 In App.js there is a call to databse.init(). When "test" is sent as a parameter the application will use the data in backend/TestData.js. Otherwise it will use AsyncStorage to store data locally in either the browser or the phone/simulator.
 
