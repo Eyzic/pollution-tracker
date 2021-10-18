@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import * as ApiCaller from './backend/ApiCaller';
 import { PollutionHistory } from './backend/PollutionHistory';
 import MainPage from './screens/CurrentWeather';
@@ -15,9 +15,11 @@ export default function App() {
 
   return (
     <DatabaseContext.Provider value={database}>
-      <View style={styles.container}>
-        {isLoading ? <Text>Loading data...</Text> : <MainPage />}
-      </View >
+      <ScrollView>
+        <View style={styles.container}>
+          {isLoading ? <Text>Loading data...</Text> : <MainPage />}
+        </View >
+      </ScrollView>
     </DatabaseContext.Provider>
   );
 }
@@ -26,6 +28,8 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 45,
+    paddingBottom: 45,
     flex: 1,
     backgroundColor: '#6F9CF4',
     justifyContent: 'center',
