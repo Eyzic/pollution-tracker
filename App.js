@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
-import * as ApiCaller from './backend/ApiCaller';
 import { PollutionHistory } from './backend/PollutionHistory';
 import MainPage from './screens/CurrentWeather';
-import DatabaseContext from './DatabaseContext';
+import DatabaseContext from './contexts/DatabaseContext';
 import { runAllTests } from './test/unitTests';
 
 export default function App() {
@@ -25,8 +24,6 @@ export default function App() {
     </DatabaseContext.Provider>
   );
 }
-
-//Perhaps change pollution text to change color depending on danger level.
 
 const styles = StyleSheet.create({
   container: {

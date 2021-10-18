@@ -1,4 +1,3 @@
-import * as Util from '../utility/utilFunctions';
 import { PollutionHistory } from '../backend/PollutionHistory';
 
 let date = new Date("1626213600"); //2021-07-14  00:00:00
@@ -33,7 +32,3 @@ const validationDataMonday = [
     data,
     1626127200
 ];
-
-function testFindneareastMonday() {
-
-}

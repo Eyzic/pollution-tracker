@@ -1,5 +1,4 @@
 import { OPENWEATHERMAP_API_KEY } from './Local_Key.js'
-import * as Location from 'expo-location';
 
 export function getCurrentWeather(latitude, longitude) {
     return fetchJson(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHERMAP_API_KEY}&units=metric`)
