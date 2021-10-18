@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TestData } from "./TestData";
+import * as Util from '../utility/utilFunctions';
 
 //import * as SecureStore from 'expo-secure-store';
 
@@ -30,6 +31,8 @@ export class PollutionHistory {
         console.log(this.pollutionList.length == 0);
         return this.pollutionList.length == 0 ? [] : this.pollutionList[this.pollutionList.length - 1];
     }
+
+    //Could be moved to a db-file.
 
     async loadDataFromStorage(key) {
         try {
@@ -62,51 +65,39 @@ export class PollutionHistory {
 
         let array = this.pollutionList;
 
-        let startIndex = this.findNearestIndex(unixtime, array);
+        let startIndex = Util.findNearestIndex(unixtime, array);
+        if (startIndex >= array.length || startIndex == null) { return "TBA" }
+
         let maxAllowedTimeValue = array[startIndex].time + A_DAY_IN_UNIX_TIME;
         let totalAqiScore = 0;
+        let duration = 0;
 
         for (let i = startIndex; array[i].time < maxAllowedTimeValue; i++) {
             if (i + 1 < array.length && array[i + 1].time < maxAllowedTimeValue) {
-                totalAqiScore += array[i].aqi * (array[i + 1].time - array[i].time);
+                let timeDiff = (array[i + 1].time - array[i].time);
+                duration += timeDiff;
+                totalAqiScore += array[i].aqi * timeDiff;
             } else {
-                totalAqiScore += array[i].aqi * (maxAllowedTimeValue - array[i].time);
+                let timeDiff = (maxAllowedTimeValue - array[i].time);
+                duration += timeDiff;
+                totalAqiScore += array[i].aqi * timeDiff;
             }
+            if (i <= array.length) { break; }
         }
-        return (totalAqiScore / A_DAY_IN_UNIX_TIME).toPrecision(2);
-        //(foreach entry within interval(aqi * secondsToNextEntry)) / unix seconds (24 hour) = average Pollution for dat X
+        return (totalAqiScore / duration).toPrecision(2);
     }
 
     getPollutionWeekChart(unixtime) {
         const A_DAY_IN_UNIX_TIME = 24 * 60 * 60;
-        let weekStart = this.findNearestMonday(unixtime);
+        let weekStart = Util.findNearestMonday(unixtime);
+        console.log("WEEK TIME");
+        console.log(weekStart);
         let weekData = [];
         for (let i = 0; i < 7; i++) {
-            weekData[i] = this.getAveragePollution(weekStart + i * A_DAY_IN_UNIX_TIME);
+            weekData.push(this.getAveragePollution(weekStart + i * A_DAY_IN_UNIX_TIME));
         }
         console.log("WEEK:");
         console.log(weekData);
         return weekData;
     }
-
-    findNearestMonday(unixtime) {
-        let today = new Date(unixtime); //Date seems to be 1 day off.
-        let day = today.getUTCDay() == 0 ? 7 : today.getUTCDay() - 1;
-
-        today.setDate(today.getDate() - day);
-        today.setHours(0, 0, 0, 0);
-        return today.getTime() / 1000;
-    }
-
-    findNearestIndex(unixtime, array) {
-        return this.binaryIndexSearch(unixtime, array, 0);
-    }
-
-    binaryIndexSearch(value, array, indexCounter) {
-        let mid = Math.floor(array.length / 2);
-        if (array.length == 0) { return indexCounter }
-        if (array[mid].time <= value) { return this.binaryIndexSearch(value, array.slice(mid + 1, array.length), indexCounter + mid) }
-        if (array[mid].time >= value) { return this.binaryIndexSearch(value, array.slice(0, mid), indexCounter) }
-    }
-
 }

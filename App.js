@@ -4,12 +4,14 @@ import * as ApiCaller from './backend/ApiCaller';
 import { PollutionHistory } from './backend/PollutionHistory';
 import MainPage from './screens/CurrentWeather';
 import DatabaseContext from './DatabaseContext';
+import { runAllTests } from './test/unitTests';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const database = new PollutionHistory();
 
   useEffect(() => {
+    runAllTests();
     setIsLoading(!database.init("test"));
   }, [])
 
