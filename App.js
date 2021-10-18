@@ -10,7 +10,7 @@ export default function App() {
   const database = new PollutionHistory();
 
   useEffect(() => {
-    setIsLoading(!database.init());
+    setIsLoading(!database.init("test"));
   }, [])
 
   return (

@@ -1,8 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState, useContext } from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import * as ApiCaller from '../backend/ApiCaller';
-import { PollutionHistory } from '../backend/PollutionHistory';
 import DatabaseContext from '../DatabaseContext';
 import * as Location from 'expo-location';
 
@@ -16,14 +15,12 @@ export default function App() {
   const [wind, setWind] = useState(0);
   const [humidity, setHumidity] = useState(0);
   const [pollution, setPollution] = useState(0);
+
+  const [avgPollution, setAvgPollution] = useState(0);
+  const [weekPollution, setWeekPollution] = useState(0);
+
   const [date, setDate] = useState(getFormattedDate(new Date));
-
   const database = useContext(DatabaseContext);
-
-  useEffect(() => {
-    console.log("Loading Context");
-    console.log(database);
-  }, [])
 
   useEffect(() => {
     //Get coordinates and call Weather API on successfully getting coordinates.
@@ -64,7 +61,7 @@ export default function App() {
     })
 
 
-  }, [icon])
+  }, [])
 
   async function refreshLocation() {
     if (checkLocationPermissions()) {
@@ -105,16 +102,19 @@ export default function App() {
 
   function savePollutionData(unixtime, aqi) {
     let latestPollution = database.getLatestPollution();
-    if (latestPollution != undefined) {
-      console.log(`POLLUTION : ${latestPollution}`);
-      console.log(database);
-      if (latestPollution == []) { pollution.add(unixtime, aqi); }
-      const DAY_HAS_PASSED = (unixtime, latestPollution) => { unixtime - latestPollution.time > (60 * 60 * 24) } //Use UNIX CONSTANT later
+    const DAY_HAS_PASSED = unixtime - latestPollution.time > (60 * 60 * 24); //Use UNIX CONSTANT later
 
-      if (aqi !== latestPollution.aqi || DAY_HAS_PASSED) {
-        pollution.add(unixtime, aqi);
-      }
-    } else { console.error("Could not find latest pollution data.") }
+
+    console.log("Attempting to save data: ");
+    if (latestPollution == undefined) {
+      console.error("Could not find latest pollution data.")
+      return;
+    }
+
+    if (latestPollution.length == 0 || aqi !== latestPollution.aqi || DAY_HAS_PASSED) {
+      console.log("Added to db");
+      database.add(unixtime, aqi);
+    }
   }
 
   return (
@@ -144,6 +144,10 @@ export default function App() {
       </View>
       <Text style={styles.h2}>Current pollution level:</Text>
       <Text style={styles.h2}>{pollution}</Text>
+      <TouchableOpacity style={{ width: 100, height: 100, backgroundColor: "black" }} onPress={() => { setAvgPollution(database.getAveragePollution(Math.floor(Date.now() / 1000 - (24 * 60 * 60)))) }} />
+      <Text>{avgPollution}</Text>
+      <TouchableOpacity style={{ width: 100, height: 100, backgroundColor: "blue" }} onPress={() => { setWeekPollution(database.getPollutionWeekChart(Math.floor(Date.now() / 1000 - (24 * 60 * 60)))) }} />
+      <Text>{weekPollution}</Text>
       <StatusBar style="auto" />
     </View >
   );
