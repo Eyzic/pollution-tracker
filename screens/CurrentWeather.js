@@ -18,6 +18,7 @@ export default function App() {
 
   const [avgPollution, setAvgPollution] = useState(0);
   const [weekPollution, setWeekPollution] = useState(0);
+  const [table, setTable] = useState(0);  //Change name later
 
   const [date, setDate] = useState(getFormattedDate(new Date));
   const database = useContext(DatabaseContext);
@@ -117,6 +118,44 @@ export default function App() {
     }
   }
 
+  function createWeekPollutionElements(data) {
+    let items = []
+    if (data instanceof Array) {
+      for (let value of data) {
+        items.push(<Text>{value}</Text>); //Add key to individualize.
+      }
+    }
+    return items;
+  }
+
+  useEffect(() => {
+    let table = createWeekPollutionElements(weekPollution);
+    console.log("WEEKPOLUTION:");
+    console.log(weekPollution);
+    console.log("TABLE");
+    console.log(table);
+    setTable(table);
+  }, [weekPollution]);
+
+  function renderPollutionTable(values) {
+    return (
+      <View style={{ width: "100%" }}>
+        <View style={{ justifyContent: 'space-around', flexDirection: 'row', padding: 50 }}>
+          <Text>Mon</Text>
+          <Text>Tue</Text>
+          <Text>Wed</Text>
+          <Text>Thu</Text>
+          <Text>Fri</Text>
+          <Text>Sat</Text>
+          <Text>Sun</Text>
+        </View>
+        <View style={{ justifyContent: 'space-around', flexDirection: 'row', paddingHorizontal: 50 }} >
+          {values}
+        </View>
+      </View >
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.h1}>{date}</Text>
@@ -147,7 +186,22 @@ export default function App() {
       <TouchableOpacity style={{ width: 100, height: 100, backgroundColor: "black" }} onPress={() => { setAvgPollution(database.getAveragePollution(Math.floor(Date.now() / 1000 - (24 * 60 * 60)))) }} />
       <Text>{avgPollution}</Text>
       <TouchableOpacity style={{ width: 100, height: 100, backgroundColor: "blue" }} onPress={() => { setWeekPollution(database.getPollutionWeekChart(Math.floor(Date.now() / 1000 - (24 * 60 * 60)))) }} />
-      <Text>{weekPollution}</Text>
+
+      <View style={{ width: "100%" }}>
+        <View style={{ justifyContent: 'space-around', flexDirection: 'row', padding: 50 }}>
+          <Text>Mon</Text>
+          <Text>Tue</Text>
+          <Text>Wed</Text>
+          <Text>Thu</Text>
+          <Text>Fri</Text>
+          <Text>Sat</Text>
+          <Text>Sun</Text>
+        </View>
+        <View style={{ justifyContent: 'space-around', flexDirection: 'row', paddingHorizontal: 50 }} >
+          {table}
+        </View>
+      </View >
+
       <StatusBar style="auto" />
     </View >
   );
