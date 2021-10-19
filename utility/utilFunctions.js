@@ -19,8 +19,9 @@ export function findNearestIndex(unixtime, array) {
 function binaryIndexSearch(value, array, indexCounter) {
     let mid = Math.floor(array.length / 2);
     if (array.length == 0) { return indexCounter }
-    if (array[mid].time <= value) { return binaryIndexSearch(value, array.slice(mid + 1, array.length), indexCounter + mid + 1) }
-    if (array[mid].time >= value) { return binaryIndexSearch(value, array.slice(0, mid), indexCounter) }
+    if (array[mid].time == value) { return indexCounter + mid }
+    if (array[mid].time < value) { return binaryIndexSearch(value, array.slice(mid + 1, array.length), indexCounter + mid + 1) }
+    if (array[mid].time > value) { return binaryIndexSearch(value, array.slice(0, mid), indexCounter) }
 }
 
 
