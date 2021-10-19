@@ -128,15 +128,19 @@ export default function App() {
 
       <Text style={styles.h2}>Current pollution level:</Text>
       <Text style={styles.h2}>{pollution}</Text>
-      <TouchableOpacity style={{ width: 100, height: 100, backgroundColor: "black" }} onPress={() => {
-        setAvgPollution(database.getAveragePollution(Math.floor(Date.now() - (24 * 60 * 60))))
+      <TouchableOpacity style={{ margin: 15, backgroundColor: "#e07070", borderRadius: 15, padding: 20 }} onPress={() => {
+        setAvgPollution(database.getAveragePollution(Math.floor(Date.now() / 1000 - (24 * 60 * 60))))
       }
-      } />
-      <Text>{avgPollution}</Text>
-      <TouchableOpacity style={{ width: 100, height: 100, backgroundColor: "blue" }} onPress={() => {
-        setWeekPollution(database.getPollutionWeekChart(Math.floor(Date.now() - (24 * 60 * 60))))
+      }>
+        <Text>Get average pollution of today</Text>
+      </TouchableOpacity>
+      <Text style={styles.h1}>{avgPollution}</Text>
+      <TouchableOpacity style={{ margin: 15, backgroundColor: "#e07070", borderRadius: 15, padding: 20 }} onPress={() => {
+        setWeekPollution(database.getPollutionWeekChart(Math.floor(Date.now() / 1000 - (24 * 60 * 60))))
       }
-      } />
+      }>
+        <Text>Update weekly pollution chart</Text>
+      </TouchableOpacity>
 
       <View style={{ width: "100%" }}>
         <View style={styles.table} >

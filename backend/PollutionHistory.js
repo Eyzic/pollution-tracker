@@ -1,12 +1,12 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TestData } from "./TestData";
 import * as Util from '../utility/utilFunctions';
+import * as Database from "./database";
 
 const A_DAY_IN_UNIX_TIME = 24 * 60 * 60;
 
 export class PollutionHistory {
 
-    //Currently set to TestData permanently since loading from actual storage causes bugs.
+    //Currently set to TestData permanently since loading from actual storage causes bugs. Set to [] in order to use live storage.
     constructor() {
         this.pollutionList = TestData;
     }
@@ -16,7 +16,7 @@ export class PollutionHistory {
         if (test == "test") {
             this.pollutionList = TestData;
         } else {
-            this.pollutionList = await this.loadDataFromStorage("pollutionData");
+            this.pollutionList = await Database.loadDataFromStorage("pollutionData");
             return true;
         }
     }
@@ -28,13 +28,14 @@ export class PollutionHistory {
 
     add(unixtime, aqi) {
         this.pollutionList.push({ time: unixtime, aqi: aqi })
-        this.writeDataToStorage("pollutionData", this.pollutionList);
+        Database.writeDataToStorage("pollutionData", this.pollutionList);
     }
 
     getAveragePollution(unixtime) {
         let array = this.pollutionList;
 
         let startIndex = Util.findNearestIndex(unixtime, array);
+
         if (this.checkForIlligalIndex(startIndex, array)) { return "TBA" }
 
         let intervalEndTime = array[startIndex].time + A_DAY_IN_UNIX_TIME;
@@ -66,28 +67,4 @@ export class PollutionHistory {
         }
         return weekData;
     }
-
-
-    //Could be moved to a db-file.
-
-    async loadDataFromStorage(key) {
-        try {
-            let data = await AsyncStorage.getItem(key); //Possibly return written
-            console.log("Loaded data: ");
-            console.log(data);
-            return JSON.parse(data);
-        } catch (error) {
-            console.error(error);
-            return [];
-        }
-    }
-
-    async writeDataToStorage(key, value) {
-        try {
-            await AsyncStorage.setItem(key, JSON.stringify(value)); //Possibly return written}
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
 }

@@ -6,19 +6,19 @@ import DatabaseContext from './contexts/DatabaseContext';
 import { runAllTests } from './test/unitTests';
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isReady, setIsReady] = useState(true);
   const database = new PollutionHistory();
 
   useEffect(() => {
     runAllTests();
-    setIsLoading(!database.init("test"));
+    setIsReady(database.init("test"));
   }, [])
 
   return (
     <DatabaseContext.Provider value={database}>
       <ScrollView>
         <View style={styles.container}>
-          {isLoading ? <Text>Loading data...</Text> : <MainPage />}
+          {isReady ? <MainPage /> : <Text>Loading data...</Text>}
         </View >
       </ScrollView>
     </DatabaseContext.Provider>
